@@ -11,10 +11,21 @@ class GenreTop20ViewController: UIViewController {
     
     @IBOutlet var genreTableView: UITableView?
     
-    private let genres = Array(AllGenres)
+    // MARK: CoreData Context
+    private let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+    
+    private var genres: [Genre] = []
+    private func fetchGenres() {
+        self.genres = try! self.context.fetch(Genre.fetchRequest())
+        DispatchQueue.main.async {
+            self.genreTableView?.reloadData()
+        }
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        self.fetchGenres()
         
         // table view
         self.genreTableView?.dataSource = self
@@ -37,13 +48,11 @@ extension GenreTop20ViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         // filter movie meta data with selected genre.
         let currentSelectedGenre = self.genres[indexPath.row]
-        let newMovieMetadata = CSVHelper.getMoviesMetadata()
-            .filter { $1.genres.contains(currentSelectedGenre) }
         
         // ready for VC.
         let rootCon = GenreTop20DetailViewController(
-            moviesMetadata: newMovieMetadata,
-            genreName: currentSelectedGenre.name
+            moviesMetadata: Array(_immutableCocoaArray: currentSelectedGenre.metadata ?? NSSet()),
+            genreName: currentSelectedGenre.name!
         )
         let navCon = UINavigationController(rootViewController: rootCon)
         self.present(navCon, animated: true)
@@ -52,7 +61,7 @@ extension GenreTop20ViewController: UITableViewDelegate {
 
 extension GenreTop20ViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return AllGenres.count
+        return self.genres.count
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {

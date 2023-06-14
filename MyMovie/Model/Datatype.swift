@@ -8,34 +8,33 @@
 import Foundation
 
 
-struct MovieMetadata: Codable, Hashable {
-    let id: UInt32
-    let genres: [Genre]
-    let overview: String?
-    let poster_path: String?
-    let title: String
-    let vote_average: Float
-    let vote_count: UInt32
-    let adult: Bool
-    let runtime: String
-    let release_date: String
-}
+//struct MovieMetadata: Codable, Hashable {
+//    let id: UInt32
+//    let genres: [Genre]
+//    let overview: String?
+//    let poster_path: String?
+//    let title: String
+//    let vote_average: Float
+//    let vote_count: UInt32
+//    let adult: Bool
+//    let runtime: String
+//    let release_date: String
+//}
 
 
-struct Genre: Codable, Hashable {
+struct GenreJsonModel: Codable, Hashable {
     let id: UInt32
     let name: String
 }
 
-var AllGenres: Set<Genre> = Set() // For collect all genres without any deplicates.
+//var AllGenres: Set<Genre> = Set() // For collect all genres without any deplicates.
 
-struct Credit: Codable {
-    let cast: [Cast]
-//    let crew: [Crew] // no need to scrapping crew actually.
-    let id: UInt32
-}
+//struct Credit: Codable {
+//    let id: UInt32
+//    let cast: [Cast]
+//}
 
-struct Cast: Codable {
+struct CastJsonModel: Codable {
     let cast_id: UInt32
     let character: String
     let credit_id: String
@@ -48,9 +47,9 @@ struct Cast: Codable {
  userId,movieId,rating,timestamp
  1,31,2.5,1260759144
  */
-struct Rating: Codable {
-    let user_id: UInt32
-    let movie_id: UInt32
-    let rating: Float
-    let timestamp: UInt64
-}
+//struct Rating: Codable {
+//    let user_id: UInt32
+//    let movie_id: UInt32
+//    let rating: Float
+//    let timestamp: UInt64
+//}

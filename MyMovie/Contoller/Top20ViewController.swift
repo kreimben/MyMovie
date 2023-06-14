@@ -12,14 +12,23 @@ class Top20ViewController: UIViewController {
     @IBOutlet var top20Button: UIButton?
     @IBOutlet var top20TableView: UITableView?
     
-    private var moviesMetadata: Dictionary<Int, MovieMetadata> = CSVHelper.getMoviesMetadata()
+    // MARK: CoreData Context
+    private let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+    
     private var movies: Array<MovieMetadata> = []
+    private func fetchMovies() {
+        self.movies = try! context.fetch(MovieMetadata.fetchRequest())
+        DispatchQueue.main.async {
+            self.top20TableView?.reloadData()
+        }
+    }
+    
     private let image = UIImage(named: "poster_sample.jpg")
 
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        self.movies = Array(moviesMetadata.values)
+        self.fetchMovies()
         
         // table view
         self.top20TableView?.dataSource = self
@@ -56,7 +65,7 @@ extension Top20ViewController: UITableViewDataSource {
         cell.movieOverview?.text = curr[indexPath.row].overview
         cell.movieVoteCount?.text = String(curr[indexPath.row].vote_count)
         cell.movieVoteAverage?.text = String(curr[indexPath.row].vote_average)
-        cell.movieID?.text = String(curr[indexPath.row].id)
+        cell.movieID?.text = String(curr[indexPath.row].movie_id)
         cell.movieThumbnail?.image = self.image
         
         return cell

@@ -7,144 +7,193 @@
 
 import SwiftCSV
 import Foundation
+import UIKit
 
 class CSVHelper {
     private static let decoder = JSONDecoder()
-    private static var metadata: Dictionary<Int, MovieMetadata>? = nil
-    private static var credits: [Credit]? = nil
-    private static var ratings: [Rating]? = nil
+    private static let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     
     
-    public static func getRatings() -> [Rating] {
-        if self.ratings == nil {
-            let path = Bundle.main.path(forResource: "ratings", ofType: ".csv", inDirectory: "DataSet")
+    public static func initializeRatings() {
+        let path = Bundle.main.path(forResource: "ratings", ofType: ".csv", inDirectory: "DataSet")
+        
+        let url = URL(filePath: path!)
+        
+        do {
+            let csv = try CSV<Named>(url: url)
             
-            let url = URL(filePath: path!)
-            
-            do {
-                let csv = try CSV<Named>(url: url)
-                
-                self.ratings = []
-                
-                csv.rows.enumerated().forEach { index, row in
-                    print("ratings: \(index) / \(csv.rows.count)")
-                    self.ratings!.append(
-                        Rating(
-                            user_id: UInt32(row["userId"] ?? "0")!,
-                            movie_id: UInt32(row["movieId"] ?? "0")!,
-                            rating: Float(row["rating"] ?? "0.0")!,
-                            timestamp: UInt64(row["timestamp"] ?? "0")!
-                        )
-                    )
+            csv.rows.enumerated().forEach { index, row in
+                print("ratings: \(index) / \(csv.rows.count)")
+                //                self.ratings!.append(
+                //                    Rating(
+                //                        user_id: UInt32(row["userId"] ?? "0")!,
+                //                        movie_id: UInt32(row["movieId"] ?? "0")!,
+                //                        rating: Float(row["rating"] ?? "0.0")!,
+                //                        timestamp: UInt64(row["timestamp"] ?? "0")!
+                //                    )
+                //                )
+                let rating = Rating(context: context)
+                rating.user_id = Int32(row["userId"] ?? "0")!
+                rating.rating = Float(row["rating"] ?? "0.0")!
+                rating.timestamp = Int64(row["timestamp"] ?? "0")!
+                // should find movie object before set
+                if let midString = row["movieId"],
+                   let movieId = Int(midString) {
+                    let movies = try! context.fetch(MovieMetadata.fetchRequest())
+                    for movie in movies {
+                        if movie.movie_id == movieId {
+                            rating.movie = movie
+                            break
+                        }
+                    }
                 }
-            } catch {
-                fatalError("Error to convert CSV file: \(error)")
             }
+            
+            if context.hasChanges {
+                try! context.save()
+            }
+        } catch {
+            fatalError("Error to convert CSV file: \(error)")
         }
-        return self.ratings!
+        
     }
     
     
-    public static func getCredits() -> [Credit] {
-        if self.credits == nil {
-            let path = Bundle.main.path(forResource: "credits", ofType: ".csv", inDirectory: "DataSet")
+    public static func initializeCredits() {
+        let path = Bundle.main.path(forResource: "credits", ofType: ".csv", inDirectory: "DataSet")
+        
+        let url = URL(filePath: path!)
+        
+        do {
+            let csv = try CSV<Named>(url: url)
             
-            let url = URL(filePath: path!)
-            
-            do {
-                let csv = try CSV<Named>(url: url)
+            for row in csv.rows {
+                var castsJsonMoel: [CastJsonModel] = []
                 
-                self.credits = []
-                
-                csv.rows.enumerated().forEach { index, row in
-                    var casts: [Cast] = []
-                    
-                    do {
-                        guard var jsonString = row["cast"] else {
-                            fatalError("Error to convert row column to string.")
-                        }
-                        jsonString = jsonString.replacingOccurrences(of: "'", with: "\"")
-                        jsonString = jsonString.replacingOccurrences(of: "None", with: "null")
-                        guard let jsonData = jsonString.data(using: .utf8) else {
-                            fatalError("Error to convert json string to data.")
-                        }
-                        print("before converting cast json")
-                        let json: [Cast] = try self.decoder.decode([Cast].self, from: jsonData)
-                        print("after converting cast json")
-                        casts = json
-                    } catch {
-                        //                        print("Error to convert JSON: \(error)")
+                // Convert json to hashable model.
+                do {
+                    guard var jsonString = row["cast"] else {
+                        fatalError("Error to convert row column to string.")
                     }
-                    
-                    print("credits: \(index) / \(csv.rows.count)")
-                    self.credits!.append(
-                        Credit(cast: casts, id: UInt32(row["id"]!)!)
-                    )
+                    jsonString = jsonString.replacingOccurrences(of: "'", with: "\"")
+                    jsonString = jsonString.replacingOccurrences(of: "None", with: "null")
+                    guard let jsonData = jsonString.data(using: .utf8) else {
+                        fatalError("Error to convert json string to data.")
+                    }
+                    print("before converting cast json")
+                    let json: [CastJsonModel] = try self.decoder.decode([CastJsonModel].self, from: jsonData)
+                    print("after converting cast json")
+                    castsJsonMoel = json
+                } catch {
+                    // print("Error to convert JSON: \(error)")
                 }
-            } catch {
-                fatalError("Error to convert CSV file: \(error)")
+                
+                let credit = Credit(context: context)
+                let movies = try! context.fetch(MovieMetadata.fetchRequest())
+                let movie = movies.filter { $0.movie_id == Int32(row["id"]!)! }
+                if !movie.isEmpty {
+                    credit.movie = movie[0]
+                }
+                
+                let casts: [Cast] = try! context.fetch(Cast.fetchRequest())
+                for castJsonModel in castsJsonMoel {
+                    let searchedCasts = casts.filter({ c in c.cast_id == castJsonModel.cast_id })
+                    if searchedCasts.isEmpty {
+                        let c = Cast(context: context)
+                        c.cast_id = Int32(castJsonModel.cast_id)
+                        c.character = castJsonModel.character
+                        c.name = castJsonModel.name
+                        c.profile_path = castJsonModel.profile_path
+                        c.credits = NSSet(array: [credit])
+                    } else if searchedCasts.count == 1 {
+                        let currCast: Cast = searchedCasts[0]
+                        currCast.addToCredits(credit)
+                    } else { fatalError("duplicated casts") }
+                }
+                //                self.credits!.append(
+                //                    Credit(cast: casts, id: UInt32(row["id"]!)!)
+                //                )
             }
+        } catch {
+            fatalError("Error to convert CSV file: \(error)")
         }
         
-        return self.credits!
+        if context.hasChanges {
+            try! context.save()
+        }
     }
     
-    public static func getMoviesMetadata() -> Dictionary<Int, MovieMetadata> {
-        if self.metadata == nil {
-            let path = Bundle.main.path(forResource: "movies_metadata", ofType: ".csv", inDirectory: "DataSet")
+    public static func initializeMoviesMetadata(){
+        let path = Bundle.main.path(forResource: "movies_metadata", ofType: ".csv", inDirectory: "DataSet")
+        
+        let url = URL(filePath: path!)
+        
+        do {
+            let csv = try CSV<Named>(url: url)
             
-            let url = URL(filePath: path!)
-            
-            do {
-                let csv = try CSV<Named>(url: url)
+            for row in csv.rows {
+                var genres: [GenreJsonModel]
                 
-                self.metadata = [:]
-                
-                csv.rows.enumerated().forEach { index, row in
-                    var genres: [Genre]
-                    
-                    do {
-                        guard var jsonString = row["genres"] else {
-                            fatalError("Error to convert row column to string.")
-                        }
-                        jsonString = jsonString.replacingOccurrences(of: "'", with: "\"")
-                        guard let jsonData = jsonString.data(using: .utf8) else {
-                            fatalError("Error to convert json string to data.")
-                        }
-                        print("before converting genre json")
-                        let json: [Genre] = try self.decoder.decode([Genre].self, from: jsonData)
-                        print("after converting genre json")
-                        genres = json
-                    } catch {
-                        fatalError("Error to convert JSON: \(error)")
+                do {
+                    guard var jsonString = row["genres"] else {
+                        fatalError("Error to convert row column to string.")
                     }
-                    
-                    // collect genres.
-                    for genre in genres {
-                        AllGenres.insert(genre)
+                    jsonString = jsonString.replacingOccurrences(of: "'", with: "\"")
+                    guard let jsonData = jsonString.data(using: .utf8) else {
+                        fatalError("Error to convert json string to data.")
                     }
-                    
-                    guard let row_id = row["id"],
-                          let id = Int(row_id) else { fatalError("fatal to convert row id") }
-                    print("metadata: \(index) / \(csv.rows.count)")
-                    self.metadata![id] = MovieMetadata(id: UInt32(id),
-                                                       genres: genres,
-                                                       overview: row["overview"],
-                                                       poster_path: row["poster_path"],
-                                                       title: row["title"]!,
-                                                       vote_average: Float(row["vote_average"]!) ?? 0.0,
-                                                       vote_count: UInt32(row["vote_count"]!) ?? 0,
-                                                       adult: (row["adult"] == "true"),
-                                                       runtime: row["runtime"]!,
-                                                       release_date: row["release_date"]!
-                    )
+                    let json: [GenreJsonModel] = try self.decoder.decode([GenreJsonModel].self, from: jsonData)
+                    genres = json
+                } catch {
+                    fatalError("Error to convert JSON: \(error)")
                 }
                 
-            } catch {
-                fatalError("Error to convert CSV file: \(error)")
+                guard let raw_id = row["id"],
+                      let id = Int32(raw_id) else { print("fatal to convert raw id"); continue }
+//                self.metadata![id] = MovieMetadata(
+//                    id: UInt32(id),
+//                    genres: genres,
+//                    overview: row["overview"],
+//                    poster_path: row["poster_path"],
+//                    title: row["title"]!,
+//                    vote_average: Float(row["vote_average"]!) ?? 0.0,
+//                    vote_count: UInt32(row["vote_count"]!) ?? 0,
+//                    adult: (row["adult"] == "true"),
+//                    runtime: row["runtime"]!,
+//                    release_date: row["release_date"]!
+//                )
+                
+                let metadata = MovieMetadata(context: context)
+                metadata.movie_id = id
+                metadata.overview = row["overview"]
+                metadata.poster_path = row["poster_path"]
+                metadata.title = row["title"]
+                metadata.vote_count = Int32(row["vote_count"]!) ?? 0
+                metadata.vote_average = Float(row["vote_average"]!) ?? 0.0
+                metadata.adult = (row["adult"] == "true")
+                metadata.runtime = row["runtime"]
+                metadata.release_date = row["release_date"]
+                
+                // collect genres.
+                for genre in genres {
+                    let searchedGenre = try! context.fetch(Genre.fetchRequest()).filter { $0.name == genre.name}
+                    if searchedGenre.isEmpty {
+                        let g = Genre(context: context)
+                        g.name = genre.name
+                        g.metadata = NSSet(array: [metadata])
+                    } else if searchedGenre.count == 1 {
+                        let g: Genre = searchedGenre[0]
+                        g.addToMetadata(metadata)
+                    } else { fatalError("duplicated genres") }
+                }
             }
+            
+        } catch {
+            fatalError("Error to convert CSV file: \(error)")
         }
         
-        return self.metadata!
+        if context.hasChanges {
+            try! context.save()
+        }
     }
 }

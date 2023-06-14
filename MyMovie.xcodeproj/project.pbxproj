@@ -32,6 +32,8 @@
 		977F8C7C2A205C5E008C4D25 /* GenreTop20TableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 977F8C7A2A205C5E008C4D25 /* GenreTop20TableViewCell.xib */; };
 		977F8C7F2A205DBC008C4D25 /* GenreTop20DetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 977F8C7D2A205DBC008C4D25 /* GenreTop20DetailViewController.swift */; };
 		977F8C802A205DBC008C4D25 /* GenreTop20DetailViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 977F8C7E2A205DBC008C4D25 /* GenreTop20DetailViewController.xib */; };
+		97ACB49C2A399120002A8789 /* Entity.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 97ACB49A2A399120002A8789 /* Entity.xcdatamodeld */; };
+		97ACB4C92A39A155002A8789 /* Rating+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97ACB4C72A39A155002A8789 /* Rating+CoreDataClass.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -61,6 +63,8 @@
 		977F8C7A2A205C5E008C4D25 /* GenreTop20TableViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = GenreTop20TableViewCell.xib; sourceTree = "<group>"; };
 		977F8C7D2A205DBC008C4D25 /* GenreTop20DetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GenreTop20DetailViewController.swift; sourceTree = "<group>"; };
 		977F8C7E2A205DBC008C4D25 /* GenreTop20DetailViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = GenreTop20DetailViewController.xib; sourceTree = "<group>"; };
+		97ACB49B2A399120002A8789 /* Entity.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Entity.xcdatamodel; sourceTree = "<group>"; };
+		97ACB4C72A39A155002A8789 /* Rating+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Rating+CoreDataClass.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -123,8 +127,10 @@
 		977F8C652A204797008C4D25 /* Model */ = {
 			isa = PBXGroup;
 			children = (
+				97ACB4C72A39A155002A8789 /* Rating+CoreDataClass.swift */,
 				977F8C702A204AE3008C4D25 /* CSVHelper.swift */,
 				977F8C752A204C0E008C4D25 /* Datatype.swift */,
+				97ACB49A2A399120002A8789 /* Entity.xcdatamodeld */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -250,8 +256,10 @@
 				977F8C782A205A70008C4D25 /* extensions.swift in Sources */,
 				977F8C712A204AE3008C4D25 /* CSVHelper.swift in Sources */,
 				977F8C6B2A2048D1008C4D25 /* GenreTop20ViewController.swift in Sources */,
+				97ACB49C2A399120002A8789 /* Entity.xcdatamodeld in Sources */,
 				977F8C7F2A205DBC008C4D25 /* GenreTop20DetailViewController.swift in Sources */,
 				9753B8972A38518F00238933 /* RatingTableViewCell.swift in Sources */,
+				97ACB4C92A39A155002A8789 /* Rating+CoreDataClass.swift in Sources */,
 				977F8C762A204C0E008C4D25 /* Datatype.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -487,6 +495,19 @@
 			productName = SwiftCSV;
 		};
 /* End XCSwiftPackageProductDependency section */
+
+/* Begin XCVersionGroup section */
+		97ACB49A2A399120002A8789 /* Entity.xcdatamodeld */ = {
+			isa = XCVersionGroup;
+			children = (
+				97ACB49B2A399120002A8789 /* Entity.xcdatamodel */,
+			);
+			currentVersion = 97ACB49B2A399120002A8789 /* Entity.xcdatamodel */;
+			path = Entity.xcdatamodeld;
+			sourceTree = "<group>";
+			versionGroupType = wrapper.xcdatamodel;
+		};
+/* End XCVersionGroup section */
 	};
 	rootObject = 977F8C432A204771008C4D25 /* Project object */;
 }

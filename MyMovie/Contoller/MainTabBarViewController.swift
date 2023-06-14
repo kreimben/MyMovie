@@ -24,6 +24,9 @@ class MainTabBarViewController: UITabBarController {
         guard let items = self.tabBar.items else { return }
         items[items.count - 1].title = "Detail"
         items[items.count - 1].image = UIImage(systemName: "circle.fill")
+        
+        // MARK: - UIAppDelegate
+        let _ = (UIApplication.shared.delegate as! AppDelegate).persistentContainer
     }
 
 }

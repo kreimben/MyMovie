@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="21754" systemVersion="22F66" minimumToolsVersion="Automatic" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+    <entity name="Cast" representedClassName="Cast" syncable="YES" codeGenerationType="class">
+        <attribute name="cast_id" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="character" optional="YES" attributeType="String"/>
+        <attribute name="name" optional="YES" attributeType="String"/>
+        <attribute name="profile_path" optional="YES" attributeType="String"/>
+        <relationship name="credits" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Credit" inverseName="casts" inverseEntity="Credit"/>
+    </entity>
+    <entity name="Credit" representedClassName="Credit" syncable="YES" codeGenerationType="class">
+        <relationship name="casts" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Cast" inverseName="credits" inverseEntity="Cast"/>
+        <relationship name="movie" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="MovieMetadata" inverseName="credit" inverseEntity="MovieMetadata"/>
+    </entity>
+    <entity name="Genre" representedClassName="Genre" syncable="YES" codeGenerationType="class">
+        <attribute name="id" attributeType="Integer 32" minValueString="0" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="name" optional="YES" attributeType="String"/>
+        <relationship name="metadata" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="MovieMetadata" inverseName="genres" inverseEntity="MovieMetadata"/>
+    </entity>
+    <entity name="MovieMetadata" representedClassName="MovieMetadata" syncable="YES" codeGenerationType="class">
+        <attribute name="adult" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
+        <attribute name="movie_id" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="overview" optional="YES" attributeType="String"/>
+        <attribute name="poster_path" optional="YES" attributeType="String"/>
+        <attribute name="release_date" optional="YES" attributeType="String"/>
+        <attribute name="runtime" optional="YES" attributeType="String"/>
+        <attribute name="title" optional="YES" attributeType="String"/>
+        <attribute name="vote_average" optional="YES" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="vote_count" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
+        <relationship name="credit" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Credit" inverseName="movie" inverseEntity="Credit"/>
+        <relationship name="genres" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Genre" inverseName="metadata" inverseEntity="Genre"/>
+        <relationship name="ratings" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Rating" inverseName="movie" inverseEntity="Rating"/>
+    </entity>
+    <entity name="Rating" representedClassName="Rating" syncable="YES" codeGenerationType="category">
+        <attribute name="rating" optional="YES" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="timestamp" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="user_id" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
+        <relationship name="movie" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="MovieMetadata" inverseName="ratings" inverseEntity="MovieMetadata"/>
+    </entity>
+</model>

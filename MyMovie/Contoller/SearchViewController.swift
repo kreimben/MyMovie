@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import CoreData
 
 class SearchViewController: UIViewController {
     
@@ -13,13 +14,49 @@ class SearchViewController: UIViewController {
     @IBOutlet var searchButton: UIButton?
     @IBOutlet var searchResultsTableView: UITableView?
     
-    private var searchedResults: Dictionary<Int, MovieMetadata> = Dictionary()
-    private var movies: Array<MovieMetadata> = Array()
+    // MARK: CoreData Context
+    private let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     
-    private var credits: [Credit] = CSVHelper.getCredits()
-    private var moviesMetadata: Dictionary<Int, MovieMetadata> = CSVHelper.getMoviesMetadata()
+    private var searchedResults: Array<MovieMetadata> = []
+    
+    private func findMoviesByKeywordOrName(keyword: String) {
+        let req = MovieMetadata.fetchRequest() as NSFetchRequest<MovieMetadata>
+        var res: [MovieMetadata] = []
+        
+        var pred = NSPredicate(format: "title CONTAINS %@", keyword)
+        req.predicate = pred
+        let moviesByKeyword = try! context.fetch(req)
+        moviesByKeyword.forEach { res.append($0) }
+        
+        let credits = self.findCastsByName(name: keyword)
+        for credit in credits {
+            pred = NSPredicate(format: "credit == %@", credit)
+            req.predicate = pred
+            let moviesByCredit = try! context.fetch(req)
+            moviesByCredit.forEach { res.append($0) }
+        }
+        
+        self.searchedResults = res
+        self.searchedResults.sort { $0.vote_average > $1.vote_average }
+        
+        DispatchQueue.main.async {
+            self.searchResultsTableView?.reloadData()
+        }
+    }
+    
+    private func findCastsByName(name: String) -> [Cast] {
+        let allCasts = try! self.context.fetch(Cast.fetchRequest())
+        return allCasts.filter { cast in
+            if let name = cast.name, name.contains(name) {
+                return true
+            } else {
+                return false
+            }
+        }
+    }
+    
     private var image = UIImage(named: "poster_sample.jpg")
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -40,14 +77,14 @@ extension SearchViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "Top20TableViewCell", for: indexPath) as! Top20TableViewCell
         
-        if indexPath.row < self.movies.count {
-            let curr = self.movies[indexPath.row]
+        if indexPath.row < self.searchedResults.count {
+            let curr = self.searchedResults[indexPath.row]
             
-            cell.movieTitle?.text = "\(indexPath.row + 1). \(curr.title)"
+            cell.movieTitle?.text = "\(indexPath.row + 1). \(curr.title ?? "N/A")"
             cell.movieOverview?.text = curr.overview
             cell.movieVoteCount?.text = String(curr.vote_count)
             cell.movieVoteAverage?.text = String(curr.vote_average)
-            cell.movieID?.text = String(curr.id)
+            cell.movieID?.text = String(curr.movie_id)
             cell.movieThumbnail?.image = self.image
         }
         
@@ -66,7 +103,7 @@ extension SearchViewController: UITableViewDelegate {
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         // populate cell info
-        let curr = self.movies[indexPath.row]
+        let curr = self.searchedResults[indexPath.row]
         // ready VC with navCon
         let detailVC = MovieDetailViewController(detail: curr)
         let len = self.tabBarController!.viewControllers!.count
@@ -86,30 +123,33 @@ extension SearchViewController {
             return
         }
         
-//        print("search keyword: \(keyword)")
+        //        print("search keyword: \(keyword)")
         
         // search movie itself first.
-        self.searchedResults = self.moviesMetadata
-            .filter { self.containsCaseInsensitive($1.title, keyword) }
+        //        self.searchedResults = self.moviesMetadata
+        //            .filter { self.containsCaseInsensitive($1.title, keyword) }
         
-//        print("searched results: \(self.searchedResults.count)")
+        
+        //        print("searched results: \(self.searchedResults.count)")
         
         // search name second.
-        let searchedCredit = self.credits
-            .filter { $0.cast.filter { self.containsCaseInsensitive($0.name, keyword) }.count > 0 }
-        print("searched credit: \(searchedCredit)")
-        for credit in searchedCredit {
-            if !self.searchedResults.contains(where: { dictId, _ in return dictId == credit.id }) {
-                // if there is no any id in `self.searchedResults`.
-                self.searchedResults[Int(credit.id)] = self.moviesMetadata[Int(credit.id)]
-            }
-        }
+//        let searchedCredit = self.credits
+//            .filter { $0.cast.filter { self.containsCaseInsensitive($0.name, keyword) }.count > 0 }
+//        print("searched credit: \(searchedCredit)")
+//        for credit in searchedCredit {
+//            if !self.searchedResults.contains(where: { dictId, _ in return dictId == credit.id }) {
+//                // if there is no any id in `self.searchedResults`.
+//                self.searchedResults[Int(credit.id)] = self.moviesMetadata[Int(credit.id)]
+//            }
+//        }
+//
+//        //        print("search final: \(self.searchedResults)")
+//
+//        self.movies = Array(self.searchedResults.values)
+//        self.movies.sort { $0.vote_average > $1.vote_average }
+//
+//        self.searchResultsTableView?.reloadData()
         
-//        print("search final: \(self.searchedResults)")
-        
-        self.movies = Array(self.searchedResults.values)
-        self.movies.sort { $0.vote_average > $1.vote_average }
-        
-        self.searchResultsTableView?.reloadData()
+        self.findMoviesByKeywordOrName(keyword: keyword)
     }
 }

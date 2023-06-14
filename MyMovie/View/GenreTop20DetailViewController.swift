@@ -9,7 +9,7 @@ import UIKit
 
 class GenreTop20DetailViewController: UIViewController {
     
-    private var moviesMetadata: Dictionary<Int, MovieMetadata> = Dictionary()
+    private var movies: Array<MovieMetadata> = []
     private var genreName = ""
     
     @IBOutlet var navBar: UINavigationBar?
@@ -28,9 +28,9 @@ class GenreTop20DetailViewController: UIViewController {
         self.genreTop20DetailTableView?.allowsSelection = false
     }
     
-    convenience init(moviesMetadata: Dictionary<Int, MovieMetadata>, genreName: String = "") {
+    convenience init(moviesMetadata: Array<MovieMetadata>, genreName: String = "") {
         self.init()
-        self.moviesMetadata = moviesMetadata
+        self.movies = moviesMetadata
         self.genreName = genreName
         self.genreTop20DetailTableView?.reloadData()
     }
@@ -50,20 +50,20 @@ extension GenreTop20DetailViewController: UITableViewDelegate {
 
 extension GenreTop20DetailViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return min(20, self.moviesMetadata.count)
+        return min(20, self.movies.count)
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "Top20TableViewCell", for: indexPath) as! Top20TableViewCell
         
-        if indexPath.row < self.moviesMetadata.count {
-            let curr = Array(self.moviesMetadata.values)
+        if indexPath.row < self.movies.count {
+            let curr = self.movies[indexPath.row]
             
-            cell.movieTitle?.text = "\(indexPath.row + 1). \(curr[indexPath.row].title)"
-            cell.movieOverview?.text = curr[indexPath.row].overview
-            cell.movieVoteCount?.text = String(curr[indexPath.row].vote_count)
-            cell.movieVoteAverage?.text = String(curr[indexPath.row].vote_average)
-            cell.movieID?.text = String(curr[indexPath.row].id)
+            cell.movieTitle?.text = "\(indexPath.row + 1). \(curr.title ?? "N/A")"
+            cell.movieOverview?.text = curr.overview
+            cell.movieVoteCount?.text = String(curr.vote_count)
+            cell.movieVoteAverage?.text = String(curr.vote_average)
+            cell.movieID?.text = String(curr.movie_id)
         }
         
         return cell

@@ -20,7 +20,20 @@ class MovieDetailViewController: UIViewController {
     @IBOutlet var reviewTextField: UITextField?
     
     private var movie: MovieMetadata?
-    private var ratings: [Rating] = CSVHelper.getRatings()
+    private lazy var ratings: [Rating] = []
+    private func fetchRatings() {
+        // fetching the data from CoreData.
+        self.ratings = try! self.context.fetch(Rating.fetchRequest())
+        if self.movie != nil {
+            self.ratings = self.ratings.filter { $0.movie == self.movie! }
+        }
+        DispatchQueue.main.async {
+            self.reviewTableView?.reloadData()
+        }
+    }
+    
+    // MARK: CoreData Context
+    private let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -36,16 +49,13 @@ class MovieDetailViewController: UIViewController {
         } else {
             self.movieTitle?.text = self.movie?.title
             self.movieVoteAverage?.text = String(self.movie?.vote_average ?? 0.0)
-            let year = self.movie?.release_date.split(separator: "-")[0]
+            let year = self.movie?.release_date!.split(separator: "-")[0]
             self.movieReleaseDate?.text = String(year!)
-            self.moviePlayTime?.text = self.movie!.runtime + "분"
+            self.moviePlayTime?.text = self.movie!.runtime! + "분"
             self.movieIsAdult?.text = self.movie!.adult ? "성인영화" : "성인영화 아님"
         }
         
         // Filter by `movieId`.
-        if self.movie != nil {
-            self.ratings = self.ratings.filter { $0.movie_id == self.movie!.id }
-        }
         self.ratings.sort { $0.user_id < $1.user_id }
         
         self.reviewTableView?.dataSource = self
@@ -76,21 +86,17 @@ extension MovieDetailViewController {
         if !(0.0...10.0).contains(rating) {
             let alertController = UIAlertController(title: "범위가 올바르지 않습니다.", message: "0과 10사이의 숫자를 적어주세요.", preferredStyle: .alert)
             let alert = UIAlertAction(title: "OK", style: .default)
+            alertController.addAction(alert)
             self.present(alertController, animated: true)
             return
         }
         
-        self.ratings.append(
-            Rating(
-                user_id: 0 as UInt32,
-                movie_id: self.movie!.id,
-                rating: rating,
-                timestamp: UInt64(0)
-            )
-        )
-        
-        self.ratings.sort { $0.user_id < $1.user_id }
-        self.reviewTableView?.reloadData()
+        let newRating = Rating(context: self.context)
+        newRating.user_id = 0
+        newRating.rating = rating
+        newRating.timestamp = 0
+        try! self.context.save()
+        self.fetchRatings()
         
         print("성공적으로 리뷰를 하였습니다.")
     }
