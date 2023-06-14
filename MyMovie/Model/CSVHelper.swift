@@ -15,13 +15,15 @@ class CSVHelper {
     
     
     public static func initializeRatings() {
+        print("initialize Ratings")
         let path = Bundle.main.path(forResource: "ratings", ofType: ".csv", inDirectory: "DataSet")
         
         let url = URL(filePath: path!)
         
         do {
+            print("before load csv")
             let csv = try CSV<Named>(url: url)
-            
+            print("before enumerate")
             csv.rows.enumerated().forEach { index, row in
                 print("ratings: \(index) / \(csv.rows.count)")
                 //                self.ratings!.append(
@@ -48,18 +50,19 @@ class CSVHelper {
                     }
                 }
             }
-            
-            if context.hasChanges {
-                try! context.save()
-            }
         } catch {
             fatalError("Error to convert CSV file: \(error)")
         }
         
+        if context.hasChanges {
+            try! context.save()
+            print("saved ratings.")
+        }
     }
     
     
     public static func initializeCredits() {
+        print("initialize Credits")
         let path = Bundle.main.path(forResource: "credits", ofType: ".csv", inDirectory: "DataSet")
         
         let url = URL(filePath: path!)
@@ -80,9 +83,9 @@ class CSVHelper {
                     guard let jsonData = jsonString.data(using: .utf8) else {
                         fatalError("Error to convert json string to data.")
                     }
-                    print("before converting cast json")
+//                    print("before converting cast json")
                     let json: [CastJsonModel] = try self.decoder.decode([CastJsonModel].self, from: jsonData)
-                    print("after converting cast json")
+                    print("cast counts: \(json.count)")
                     castsJsonMoel = json
                 } catch {
                     // print("Error to convert JSON: \(error)")
@@ -92,11 +95,13 @@ class CSVHelper {
                 let movies = try! context.fetch(MovieMetadata.fetchRequest())
                 let movie = movies.filter { $0.movie_id == Int32(row["id"]!)! }
                 if !movie.isEmpty {
+                    print("found movie: \(movie[0].title)")
                     credit.movie = movie[0]
                 }
                 
                 let casts: [Cast] = try! context.fetch(Cast.fetchRequest())
                 for castJsonModel in castsJsonMoel {
+                    print("searching cast by id...")
                     let searchedCasts = casts.filter({ c in c.cast_id == castJsonModel.cast_id })
                     if searchedCasts.isEmpty {
                         let c = Cast(context: context)
@@ -105,10 +110,13 @@ class CSVHelper {
                         c.name = castJsonModel.name
                         c.profile_path = castJsonModel.profile_path
                         c.credits = NSSet(array: [credit])
+                        print("new cast created: \(c.name)")
                     } else if searchedCasts.count == 1 {
                         let currCast: Cast = searchedCasts[0]
+                        print("found original cast: \(currCast.name)")
                         currCast.addToCredits(credit)
                     } else { fatalError("duplicated casts") }
+                    print("end injection.")
                 }
                 //                self.credits!.append(
                 //                    Credit(cast: casts, id: UInt32(row["id"]!)!)
@@ -120,10 +128,12 @@ class CSVHelper {
         
         if context.hasChanges {
             try! context.save()
+            print("saved credits.")
         }
     }
     
     public static func initializeMoviesMetadata(){
+        print("initialize MoviesMetadata")
         let path = Bundle.main.path(forResource: "movies_metadata", ofType: ".csv", inDirectory: "DataSet")
         
         let url = URL(filePath: path!)
@@ -194,6 +204,7 @@ class CSVHelper {
         
         if context.hasChanges {
             try! context.save()
+            print("saved movie_metadata.")
         }
     }
 }

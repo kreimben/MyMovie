@@ -10,9 +10,9 @@ import CoreData
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
-
-
-
+    
+    
+    
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         
         // Check if database is empty.
@@ -25,19 +25,43 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             CSVHelper.initializeCredits()
             CSVHelper.initializeRatings()
             print("finished to be initalized")
+        } else {
+            /*
+             Only uncomment below when you want to clear database.
+             */
+            
+//            #if DEBUG
+//            for entityName in ["Cast", "Credit", "Genre", "MovieMetadata", "Rating"] {
+//                let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: entityName)
+//                let deleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)
+//                let context = self.persistentContainer.viewContext
+//                let coordinator = self.persistentContainer.viewContext.persistentStoreCoordinator!
+//
+//                do {
+//                    try coordinator.execute(deleteRequest, with: context)
+//                    print("\(entityName) entity cleared.")
+//                } catch let error as NSError {
+//                    print("There was an error: \(error)")
+//                }
+//            }
+//
+//            try! self.persistentContainer.viewContext.save()
+//            print("All Database Cleared!")
+//            return false
+//            #endif
         }
         
         return true
     }
-
+    
     // MARK: UISceneSession Lifecycle
-
+    
     func application(_ application: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options: UIScene.ConnectionOptions) -> UISceneConfiguration {
         // Called when a new scene session is being created.
         // Use this method to select a configuration to create the new scene with.
         return UISceneConfiguration(name: "Default Configuration", sessionRole: connectingSceneSession.role)
     }
-
+    
     func application(_ application: UIApplication, didDiscardSceneSessions sceneSessions: Set<UISceneSession>) {
         // Called when the user discards a scene session.
         // If any sessions were discarded while the application was not running, this will be called shortly after application:didFinishLaunchingWithOptions.
@@ -66,6 +90,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             }
         }
     }
-
+    
 }
 
