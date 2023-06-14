@@ -13,7 +13,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        // Override point for customization after application launch.
+        
+        // ready for models
+        // because loading large size CSV file is very expensive work.
+        let _ = CSVHelper.getRatings()
+        let _ = CSVHelper.getCredits()
+        let _ = CSVHelper.getMoviesMetadata()
+        
         return true
     }
 

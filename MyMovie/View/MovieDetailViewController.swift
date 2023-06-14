@@ -73,6 +73,13 @@ extension MovieDetailViewController {
         print("after guard")
         print("rating: \(rating)")
         
+        if !(0.0...10.0).contains(rating) {
+            let alertController = UIAlertController(title: "범위가 올바르지 않습니다.", message: "0과 10사이의 숫자를 적어주세요.", preferredStyle: .alert)
+            let alert = UIAlertAction(title: "OK", style: .default)
+            self.present(alertController, animated: true)
+            return
+        }
+        
         self.ratings.append(
             Rating(
                 user_id: 0 as UInt32,

@@ -26,7 +26,8 @@ class CSVHelper {
                 
                 self.ratings = []
                 
-                for row in csv.rows {
+                csv.rows.enumerated().forEach { index, row in
+                    print("ratings: \(index) / \(csv.rows.count)")
                     self.ratings!.append(
                         Rating(
                             user_id: UInt32(row["userId"] ?? "0")!,
@@ -55,7 +56,7 @@ class CSVHelper {
                 
                 self.credits = []
                 
-                for row in csv.rows {
+                csv.rows.enumerated().forEach { index, row in
                     var casts: [Cast] = []
                     
                     do {
@@ -67,12 +68,15 @@ class CSVHelper {
                         guard let jsonData = jsonString.data(using: .utf8) else {
                             fatalError("Error to convert json string to data.")
                         }
+                        print("before converting cast json")
                         let json: [Cast] = try self.decoder.decode([Cast].self, from: jsonData)
+                        print("after converting cast json")
                         casts = json
                     } catch {
                         //                        print("Error to convert JSON: \(error)")
                     }
                     
+                    print("credits: \(index) / \(csv.rows.count)")
                     self.credits!.append(
                         Credit(cast: casts, id: UInt32(row["id"]!)!)
                     )
@@ -96,7 +100,7 @@ class CSVHelper {
                 
                 self.metadata = [:]
                 
-                for row in csv.rows {
+                csv.rows.enumerated().forEach { index, row in
                     var genres: [Genre]
                     
                     do {
@@ -107,7 +111,9 @@ class CSVHelper {
                         guard let jsonData = jsonString.data(using: .utf8) else {
                             fatalError("Error to convert json string to data.")
                         }
+                        print("before converting genre json")
                         let json: [Genre] = try self.decoder.decode([Genre].self, from: jsonData)
+                        print("after converting genre json")
                         genres = json
                     } catch {
                         fatalError("Error to convert JSON: \(error)")
@@ -119,7 +125,8 @@ class CSVHelper {
                     }
                     
                     guard let row_id = row["id"],
-                          let id = Int(row_id) else { continue }
+                          let id = Int(row_id) else { fatalError("fatal to convert row id") }
+                    print("metadata: \(index) / \(csv.rows.count)")
                     self.metadata![id] = MovieMetadata(id: UInt32(id),
                                                        genres: genres,
                                                        overview: row["overview"],
