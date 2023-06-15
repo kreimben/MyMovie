@@ -28,12 +28,5 @@
         <attribute name="vote_count" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
         <relationship name="credit" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Credit" inverseName="movie" inverseEntity="Credit"/>
         <relationship name="genres" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Genre" inverseName="metadata" inverseEntity="Genre"/>
-        <relationship name="ratings" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="Rating" inverseName="movie" inverseEntity="Rating"/>
-    </entity>
-    <entity name="Rating" representedClassName="Rating" syncable="YES" codeGenerationType="category">
-        <attribute name="rating" optional="YES" attributeType="Float" defaultValueString="0.0" usesScalarValueType="YES"/>
-        <attribute name="timestamp" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
-        <attribute name="user_id" optional="YES" attributeType="Integer 32" defaultValueString="0" usesScalarValueType="YES"/>
-        <relationship name="movie" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="MovieMetadata" inverseName="ratings" inverseEntity="MovieMetadata"/>
     </entity>
 </model>

@@ -47,9 +47,9 @@ struct CastJsonModel: Codable {
  userId,movieId,rating,timestamp
  1,31,2.5,1260759144
  */
-//struct Rating: Codable {
-//    let user_id: UInt32
-//    let movie_id: UInt32
-//    let rating: Float
-//    let timestamp: UInt64
-//}
+struct Rating: Codable {
+    let user_id: UInt32
+    let movie_id: UInt32
+    let rating: Float
+    let timestamp: UInt64
+}

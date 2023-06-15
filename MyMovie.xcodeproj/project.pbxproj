@@ -33,7 +33,6 @@
 		977F8C7F2A205DBC008C4D25 /* GenreTop20DetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 977F8C7D2A205DBC008C4D25 /* GenreTop20DetailViewController.swift */; };
 		977F8C802A205DBC008C4D25 /* GenreTop20DetailViewController.xib in Resources */ = {isa = PBXBuildFile; fileRef = 977F8C7E2A205DBC008C4D25 /* GenreTop20DetailViewController.xib */; };
 		97ACB49C2A399120002A8789 /* Entity.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 97ACB49A2A399120002A8789 /* Entity.xcdatamodeld */; };
-		97ACB4C92A39A155002A8789 /* Rating+CoreDataClass.swift in Sources */ = {isa = PBXBuildFile; fileRef = 97ACB4C72A39A155002A8789 /* Rating+CoreDataClass.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -64,7 +63,6 @@
 		977F8C7D2A205DBC008C4D25 /* GenreTop20DetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GenreTop20DetailViewController.swift; sourceTree = "<group>"; };
 		977F8C7E2A205DBC008C4D25 /* GenreTop20DetailViewController.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = GenreTop20DetailViewController.xib; sourceTree = "<group>"; };
 		97ACB49B2A399120002A8789 /* Entity.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Entity.xcdatamodel; sourceTree = "<group>"; };
-		97ACB4C72A39A155002A8789 /* Rating+CoreDataClass.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Rating+CoreDataClass.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -127,7 +125,6 @@
 		977F8C652A204797008C4D25 /* Model */ = {
 			isa = PBXGroup;
 			children = (
-				97ACB4C72A39A155002A8789 /* Rating+CoreDataClass.swift */,
 				977F8C702A204AE3008C4D25 /* CSVHelper.swift */,
 				977F8C752A204C0E008C4D25 /* Datatype.swift */,
 				97ACB49A2A399120002A8789 /* Entity.xcdatamodeld */,
@@ -259,7 +256,6 @@
 				97ACB49C2A399120002A8789 /* Entity.xcdatamodeld in Sources */,
 				977F8C7F2A205DBC008C4D25 /* GenreTop20DetailViewController.swift in Sources */,
 				9753B8972A38518F00238933 /* RatingTableViewCell.swift in Sources */,
-				97ACB4C92A39A155002A8789 /* Rating+CoreDataClass.swift in Sources */,
 				977F8C762A204C0E008C4D25 /* Datatype.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

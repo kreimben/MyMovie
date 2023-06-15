@@ -13,10 +13,11 @@ class CSVHelper {
     private static let decoder = JSONDecoder()
     private static let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     
+    public static var ratings: Dictionary<UInt32, Array<Rating>> = [:]
     
     public static func initializeRatings() {
         print("initialize Ratings")
-        let path = Bundle.main.path(forResource: "ratings_small", ofType: ".csv", inDirectory: "DataSet")
+        let path = Bundle.main.path(forResource: "ratings", ofType: ".csv", inDirectory: "DataSet")
         
         let url = URL(filePath: path!)
         
@@ -26,38 +27,38 @@ class CSVHelper {
             print("before enumerate")
             csv.rows.enumerated().forEach { index, row in
                 print("ratings: \(index) / \(csv.rows.count)")
-                //                self.ratings!.append(
-                //                    Rating(
-                //                        user_id: UInt32(row["userId"] ?? "0")!,
-                //                        movie_id: UInt32(row["movieId"] ?? "0")!,
-                //                        rating: Float(row["rating"] ?? "0.0")!,
-                //                        timestamp: UInt64(row["timestamp"] ?? "0")!
-                //                    )
-                //                )
-                let rating = Rating(context: context)
-                rating.user_id = Int32(row["userId"] ?? "0")!
-                rating.rating = Float(row["rating"] ?? "0.0")!
-                rating.timestamp = Int64(row["timestamp"] ?? "0")!
-                // should find movie object before set
-                if let midString = row["movieId"],
-                   let movieId = Int(midString) {
-                    var movies = try! context.fetch(MovieMetadata.fetchRequest())
-                    movies = movies.filter { $0.movie_id == movieId }
-                    if movies.count > 0 {
-                        print("found movie id: \(movieId)")
-                        rating.movie = movies[0]
-                    }
-                } else {
-                    print("cannot parse movie id: \(row["movieId"])")
-                }
+                let movie_id = UInt32(row["movieId"] ?? "0")!
+                
+                if let arr = ratings[movie_id] {}
+                else { ratings[movie_id] = [] }
+                
+                ratings[movie_id]!.append(
+                    Rating(
+                        user_id: UInt32(row["userId"] ?? "0")!,
+                        movie_id: movie_id,
+                        rating: Float(row["rating"] ?? "0.0")!,
+                        timestamp: UInt64(row["timestamp"] ?? "0")!
+                    )
+                )
+                //                let rating = Rating(context: context)
+                //                rating.user_id = Int32(row["userId"] ?? "0")!
+                //                rating.rating = Float(row["rating"] ?? "0.0")!
+                //                rating.timestamp = Int64(row["timestamp"] ?? "0")!
+                //                // should find movie object before set
+                //                if let midString = row["movieId"],
+                //                   let movieId = Int(midString) {
+                //                    var movies = try! context.fetch(MovieMetadata.fetchRequest())
+                //                    movies = movies.filter { $0.movie_id == movieId }
+                //                    if movies.count > 0 {
+                //                        print("found movie id: \(movieId)")
+                //                        rating.movie = movies[0]
+                //                    }
+                //                } else {
+                //                    print("cannot parse movie id: \(row["movieId"])")
+                //                }
             }
         } catch {
             fatalError("Error to convert CSV file: \(error)")
-        }
-        
-        if context.hasChanges {
-            try! context.save()
-            print("saved ratings.")
         }
     }
     
@@ -84,7 +85,7 @@ class CSVHelper {
                     guard let jsonData = jsonString.data(using: .utf8) else {
                         fatalError("Error to convert json string to data.")
                     }
-//                    print("before converting cast json")
+                    //                    print("before converting cast json")
                     let json: [CastJsonModel] = try self.decoder.decode([CastJsonModel].self, from: jsonData)
                     print("cast counts: \(json.count)")
                     castsJsonMoel = json
@@ -161,18 +162,18 @@ class CSVHelper {
                 
                 guard let raw_id = row["id"],
                       let id = Int32(raw_id) else { print("fatal to convert raw id"); continue }
-//                self.metadata![id] = MovieMetadata(
-//                    id: UInt32(id),
-//                    genres: genres,
-//                    overview: row["overview"],
-//                    poster_path: row["poster_path"],
-//                    title: row["title"]!,
-//                    vote_average: Float(row["vote_average"]!) ?? 0.0,
-//                    vote_count: UInt32(row["vote_count"]!) ?? 0,
-//                    adult: (row["adult"] == "true"),
-//                    runtime: row["runtime"]!,
-//                    release_date: row["release_date"]!
-//                )
+                //                self.metadata![id] = MovieMetadata(
+                //                    id: UInt32(id),
+                //                    genres: genres,
+                //                    overview: row["overview"],
+                //                    poster_path: row["poster_path"],
+                //                    title: row["title"]!,
+                //                    vote_average: Float(row["vote_average"]!) ?? 0.0,
+                //                    vote_count: UInt32(row["vote_count"]!) ?? 0,
+                //                    adult: (row["adult"] == "true"),
+                //                    runtime: row["runtime"]!,
+                //                    release_date: row["release_date"]!
+                //                )
                 
                 let metadata = MovieMetadata(context: context)
                 metadata.movie_id = id
