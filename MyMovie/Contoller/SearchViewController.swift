@@ -20,31 +20,42 @@ class SearchViewController: UIViewController {
     private var searchedResults: Array<MovieMetadata> = []
     
     private func findMoviesByKeywordOrName(keyword: String) {
-        let req = MovieMetadata.fetchRequest() as NSFetchRequest<MovieMetadata>
-        var res: [MovieMetadata] = []
+        let req: NSFetchRequest<MovieMetadata> = MovieMetadata.fetchRequest()
+        var res: Set<MovieMetadata> = Set()
         
         var pred = NSPredicate(format: "title CONTAINS[cd] %@", keyword)
         req.predicate = pred
         let moviesByKeyword = try! context.fetch(req)
-        moviesByKeyword.forEach { res.append($0) }
+        moviesByKeyword.forEach { res.insert($0) }
         
         let casts = self.findCastsByName(name: keyword)
         print("searched casts: \(casts.count)")
-        for cast in casts {
-            guard let c = cast.credits else { continue }
-            let credits = c.allObjects
-            print("there are \(credits.count) credits")
+//        for cast in casts {
+//            guard let c = cast.credits else { continue }
+//            let credits = c.allObjects
+//            print("there are \(credits.count) credits")
             
-            for credit in credits {
-                let pred = NSPredicate(format: "credit == %@", credit as! Credit)
-                req.predicate = pred
-                let moviesByCredit = try! context.fetch(req)
-                moviesByCredit.forEach { res.append($0) }
-            }
-        }
+        let castReq: NSFetchRequest<MovieMetadata> = MovieMetadata.fetchRequest()
+        pred = NSPredicate(format: "credit.casts == %@", casts)
+        let ord = NSSortDescriptor(key: "vote_average", ascending: false)
+        req.predicate = pred
+        req.sortDescriptors = [ord]
+        let moviesByCast = try! context.fetch(castReq)
+        moviesByCast.forEach { res.insert($0) }
+            
+//            for credit in credits {
+//                let newReq: NSFetchRequest<MovieMetadata> = MovieMetadata.fetchRequest()
+//                pred = NSPredicate(format: "credit == %@", credit as! Credit)
+//                let ord = NSSortDescriptor(key: "vote_average", ascending: false)
+//                req.predicate = pred
+//                req.sortDescriptors = [ord]
+//                let moviesByCredit = try! context.fetch(newReq)
+//                moviesByCredit.forEach { res.append($0) }
+//            }
+//        }
         print("total \(res.count) movies searched")
         
-        self.searchedResults = res
+        self.searchedResults = Array(res)
         self.searchedResults.sort { $0.vote_average > $1.vote_average }
         
         DispatchQueue.main.async {

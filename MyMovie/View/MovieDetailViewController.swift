@@ -15,24 +15,12 @@ class MovieDetailViewController: UIViewController {
     @IBOutlet var moviePlayTime: UILabel?
     @IBOutlet var movieIsAdult: UILabel?
     @IBOutlet var movieThumbnail: UIImageView?
+    @IBOutlet var castsInfo: UILabel?
     
     @IBOutlet var reviewTableView: UITableView?
     @IBOutlet var reviewTextField: UITextField?
     
     private var movie: MovieMetadata?
-//    private lazy var ratings: [Rating] = []
-//    private func fetchRatings() {
-//        // fetching the data from CoreData.
-//        self.ratings = try! self.context.fetch(Rating.fetchRequest())
-//        print("ratings count: \(ratings.count)")
-//        if self.movie != nil {
-//            self.ratings = self.ratings.filter { $0.movie == self.movie! }
-//        }
-//        print("filtered ratings: \(ratings.count)")
-//        DispatchQueue.main.async {
-//            self.reviewTableView?.reloadData()
-//        }
-//    }
     
     // MARK: CoreData Context
     private let context = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
@@ -55,6 +43,11 @@ class MovieDetailViewController: UIViewController {
             self.movieReleaseDate?.text = String(year!)
             self.moviePlayTime?.text = self.movie!.runtime! + "분"
             self.movieIsAdult?.text = self.movie!.adult ? "성인영화" : "성인영화 아님"
+            if let casts = self.movie!.credit?.casts {
+                var castString = ""
+                casts.allObjects.forEach { castString += "\(($0 as! Cast).name!), " }
+                self.castsInfo?.text = castString
+            }
         }
         
         self.reviewTableView?.dataSource = self
@@ -63,7 +56,9 @@ class MovieDetailViewController: UIViewController {
         self.reviewTableView?.register(nib, forCellReuseIdentifier: "RatingTableViewCell")
         
         // sort ratings by movie id.
-        CSVHelper.ratings[UInt32(self.movie!.movie_id)]!.sort { $0.user_id < $1.user_id }
+        if self.movie != nil {
+            CSVHelper.ratings[UInt32(self.movie!.movie_id)]?.sort { $0.user_id < $1.user_id }
+        }
     }
     
     convenience init(detail movie: MovieMetadata) {
@@ -106,7 +101,7 @@ extension MovieDetailViewController: UITableViewDataSource {
         if self.movie == nil {
             return 0
         } else {
-            return CSVHelper.ratings[UInt32(self.movie!.movie_id)]!.count
+            return CSVHelper.ratings[UInt32(self.movie!.movie_id)]?.count ?? 0
         }
     }
     

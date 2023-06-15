@@ -41,7 +41,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
              */
             
 //            #if DEBUG
-//            let entities = ["Cast", "Credit", "Genre", "MovieMetadata", "Rating"]
+//            let entities = ["Cast", "Credit", "Genre", "MovieMetadata"]
 //            for entityName in entities {
 //                let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: entityName)
 //                let deleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)

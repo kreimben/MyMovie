@@ -162,18 +162,6 @@ class CSVHelper {
                 
                 guard let raw_id = row["id"],
                       let id = Int32(raw_id) else { print("fatal to convert raw id"); continue }
-                //                self.metadata![id] = MovieMetadata(
-                //                    id: UInt32(id),
-                //                    genres: genres,
-                //                    overview: row["overview"],
-                //                    poster_path: row["poster_path"],
-                //                    title: row["title"]!,
-                //                    vote_average: Float(row["vote_average"]!) ?? 0.0,
-                //                    vote_count: UInt32(row["vote_count"]!) ?? 0,
-                //                    adult: (row["adult"] == "true"),
-                //                    runtime: row["runtime"]!,
-                //                    release_date: row["release_date"]!
-                //                )
                 
                 let metadata = MovieMetadata(context: context)
                 metadata.movie_id = id
@@ -207,6 +195,33 @@ class CSVHelper {
         if context.hasChanges {
             try! context.save()
             print("saved movie_metadata.")
+        }
+        
+        // Create a fetch request to fetch all objects
+        let fetchRequest = MovieMetadata.fetchRequest()
+        
+        do {
+            // Fetch all objects
+            let fetchedResults = try context.fetch(fetchRequest)
+            
+            // Sort the fetched results by the specified key
+            let sortedResults = fetchedResults.sorted { $0.vote_count < $1.vote_count }
+            
+            // Determine the number of objects that exceed the top 100 limit
+            let excessCount = max(0, sortedResults.count - 100)
+            
+            if excessCount > 0 {
+                // Delete the excess objects
+                let objectsToDelete = sortedResults.prefix(excessCount)
+                for object in objectsToDelete {
+                    context.delete(object)
+                }
+                
+                // Save the changes
+                try context.save()
+            }
+        } catch {
+            // Handle the error
         }
     }
 }
