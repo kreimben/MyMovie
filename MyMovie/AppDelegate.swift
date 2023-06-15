@@ -18,20 +18,31 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Check if database is empty.
         // if not empty, pass injection
         // if empty, initialize DB.
+        
         let movies = try! self.persistentContainer.viewContext.fetch(MovieMetadata.fetchRequest())
         if movies.isEmpty {
-            print("DB is not initialized!")
             CSVHelper.initializeMoviesMetadata()
+        }
+        
+        let credits = try! self.persistentContainer.viewContext.fetch(Credit.fetchRequest())
+        if credits.isEmpty {
             CSVHelper.initializeCredits()
+        }
+        
+        let ratings = try! self.persistentContainer.viewContext.fetch(Rating.fetchRequest())
+        if ratings.isEmpty {
             CSVHelper.initializeRatings()
-            print("finished to be initalized")
-        } else {
+        }
+        
+        
+        
             /*
              Only uncomment below when you want to clear database.
              */
             
 //            #if DEBUG
-//            for entityName in ["Cast", "Credit", "Genre", "MovieMetadata", "Rating"] {
+//            let entities = ["Cast", "Credit", "Genre", "MovieMetadata", "Rating"]
+//            for entityName in entities {
 //                let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: entityName)
 //                let deleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)
 //                let context = self.persistentContainer.viewContext
@@ -46,10 +57,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 //            }
 //
 //            try! self.persistentContainer.viewContext.save()
-//            print("All Database Cleared!")
-//            return false
+//            print("\(entities) Database Cleared!")
 //            #endif
-        }
         
         return true
     }

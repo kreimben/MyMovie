@@ -14,6 +14,8 @@ class GenreTop20DetailViewController: UIViewController {
     
     @IBOutlet var navBar: UINavigationBar?
     @IBOutlet var genreTop20DetailTableView: UITableView?
+    
+    private let image = UIImage(named: "poster_sample.jpg")
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -28,9 +30,9 @@ class GenreTop20DetailViewController: UIViewController {
         self.genreTop20DetailTableView?.allowsSelection = false
     }
     
-    convenience init(moviesMetadata: Array<MovieMetadata>, genreName: String = "") {
+    convenience init(movies: Array<MovieMetadata>, genreName: String = "") {
         self.init()
-        self.movies = moviesMetadata
+        self.movies = movies
         self.genreName = genreName
         self.genreTop20DetailTableView?.reloadData()
     }
@@ -64,6 +66,7 @@ extension GenreTop20DetailViewController: UITableViewDataSource {
             cell.movieVoteCount?.text = String(curr.vote_count)
             cell.movieVoteAverage?.text = String(curr.vote_average)
             cell.movieID?.text = String(curr.movie_id)
+            cell.movieThumbnail?.image = self.image
         }
         
         return cell

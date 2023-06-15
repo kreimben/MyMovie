@@ -23,7 +23,7 @@ class SearchViewController: UIViewController {
         let req = MovieMetadata.fetchRequest() as NSFetchRequest<MovieMetadata>
         var res: [MovieMetadata] = []
         
-        var pred = NSPredicate(format: "title CONTAINS %@", keyword)
+        var pred = NSPredicate(format: "title CONTAINS[cd] %@", keyword)
         req.predicate = pred
         let moviesByKeyword = try! context.fetch(req)
         moviesByKeyword.forEach { res.append($0) }

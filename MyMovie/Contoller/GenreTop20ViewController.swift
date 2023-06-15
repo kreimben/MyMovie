@@ -48,10 +48,11 @@ extension GenreTop20ViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         // filter movie meta data with selected genre.
         let currentSelectedGenre = self.genres[indexPath.row]
+        let movies: Set<MovieMetadata> = currentSelectedGenre.metadata! as! Set<MovieMetadata>
         
         // ready for VC.
         let rootCon = GenreTop20DetailViewController(
-            moviesMetadata: Array(_immutableCocoaArray: currentSelectedGenre.metadata ?? NSSet()),
+            movies: Array(movies),
             genreName: currentSelectedGenre.name!
         )
         let navCon = UINavigationController(rootViewController: rootCon)

@@ -16,7 +16,7 @@ class CSVHelper {
     
     public static func initializeRatings() {
         print("initialize Ratings")
-        let path = Bundle.main.path(forResource: "ratings", ofType: ".csv", inDirectory: "DataSet")
+        let path = Bundle.main.path(forResource: "ratings_small", ofType: ".csv", inDirectory: "DataSet")
         
         let url = URL(filePath: path!)
         
@@ -41,13 +41,14 @@ class CSVHelper {
                 // should find movie object before set
                 if let midString = row["movieId"],
                    let movieId = Int(midString) {
-                    let movies = try! context.fetch(MovieMetadata.fetchRequest())
-                    for movie in movies {
-                        if movie.movie_id == movieId {
-                            rating.movie = movie
-                            break
-                        }
+                    var movies = try! context.fetch(MovieMetadata.fetchRequest())
+                    movies = movies.filter { $0.movie_id == movieId }
+                    if movies.count > 0 {
+                        print("found movie id: \(movieId)")
+                        rating.movie = movies[0]
                     }
+                } else {
+                    print("cannot parse movie id: \(row["movieId"])")
                 }
             }
         } catch {

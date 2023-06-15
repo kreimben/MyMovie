@@ -24,9 +24,11 @@ class MovieDetailViewController: UIViewController {
     private func fetchRatings() {
         // fetching the data from CoreData.
         self.ratings = try! self.context.fetch(Rating.fetchRequest())
+        print("ratings count: \(ratings.count)")
         if self.movie != nil {
             self.ratings = self.ratings.filter { $0.movie == self.movie! }
         }
+        print("filtered ratings: \(ratings.count)")
         DispatchQueue.main.async {
             self.reviewTableView?.reloadData()
         }
@@ -62,7 +64,8 @@ class MovieDetailViewController: UIViewController {
         self.reviewTableView?.delegate = self
         let nib = UINib(nibName: "RatingTableViewCell", bundle: .main)
         self.reviewTableView?.register(nib, forCellReuseIdentifier: "RatingTableViewCell")
-        self.reviewTableView?.reloadData()
+        
+        self.fetchRatings()
     }
     
     convenience init(detail movie: MovieMetadata) {

@@ -61,7 +61,7 @@ extension Top20ViewController: UITableViewDataSource {
         
         let curr = self.movies
         
-        cell.movieTitle?.text = "\(indexPath.row + 1). \(curr[indexPath.row].title)"
+        cell.movieTitle?.text = "\(indexPath.row + 1). \(curr[indexPath.row].title ?? "N/A")"
         cell.movieOverview?.text = curr[indexPath.row].overview
         cell.movieVoteCount?.text = String(curr[indexPath.row].vote_count)
         cell.movieVoteAverage?.text = String(curr[indexPath.row].vote_average)
