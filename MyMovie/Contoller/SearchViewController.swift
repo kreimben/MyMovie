@@ -28,13 +28,21 @@ class SearchViewController: UIViewController {
         let moviesByKeyword = try! context.fetch(req)
         moviesByKeyword.forEach { res.append($0) }
         
-        let credits = self.findCastsByName(name: keyword)
-        for credit in credits {
-            pred = NSPredicate(format: "credit == %@", credit)
-            req.predicate = pred
-            let moviesByCredit = try! context.fetch(req)
-            moviesByCredit.forEach { res.append($0) }
+        let casts = self.findCastsByName(name: keyword)
+        print("searched casts: \(casts.count)")
+        for cast in casts {
+            guard let c = cast.credits else { continue }
+            let credits = c.allObjects
+            print("there are \(credits.count) credits")
+            
+            for credit in credits {
+                let pred = NSPredicate(format: "credit == %@", credit as! Credit)
+                req.predicate = pred
+                let moviesByCredit = try! context.fetch(req)
+                moviesByCredit.forEach { res.append($0) }
+            }
         }
+        print("total \(res.count) movies searched")
         
         self.searchedResults = res
         self.searchedResults.sort { $0.vote_average > $1.vote_average }
@@ -45,14 +53,13 @@ class SearchViewController: UIViewController {
     }
     
     private func findCastsByName(name: String) -> [Cast] {
-        let allCasts = try! self.context.fetch(Cast.fetchRequest())
-        return allCasts.filter { cast in
-            if let name = cast.name, name.contains(name) {
-                return true
-            } else {
-                return false
-            }
-        }
+        print("searching name: \(name)")
+        let req = Cast.fetchRequest()
+        let pred = NSPredicate(format: "name CONTAINS[cd] %@", name)
+        req.predicate = pred
+        let res = try! self.context.fetch(req)
+        res.forEach { print("name: \(String(describing: $0.name))") }
+        return res
     }
     
     private var image = UIImage(named: "poster_sample.jpg")
@@ -123,16 +130,16 @@ extension SearchViewController {
             return
         }
         
-        //        print("search keyword: \(keyword)")
-        
-        // search movie itself first.
-        //        self.searchedResults = self.moviesMetadata
-        //            .filter { self.containsCaseInsensitive($1.title, keyword) }
-        
-        
-        //        print("searched results: \(self.searchedResults.count)")
-        
-        // search name second.
+//        print("search keyword: \(keyword)")
+//
+////        search movie itself first.
+//        self.searchedResults = self.moviesMetadata
+//            .filter { self.containsCaseInsensitive($1.title, keyword) }
+//
+//
+//        print("searched results: \(self.searchedResults.count)")
+//
+////        search name second.
 //        let searchedCredit = self.credits
 //            .filter { $0.cast.filter { self.containsCaseInsensitive($0.name, keyword) }.count > 0 }
 //        print("searched credit: \(searchedCredit)")
@@ -143,7 +150,7 @@ extension SearchViewController {
 //            }
 //        }
 //
-//        //        print("search final: \(self.searchedResults)")
+//        print("search final: \(self.searchedResults)")
 //
 //        self.movies = Array(self.searchedResults.values)
 //        self.movies.sort { $0.vote_average > $1.vote_average }
