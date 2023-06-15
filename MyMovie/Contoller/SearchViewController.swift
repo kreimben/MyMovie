@@ -30,10 +30,6 @@ class SearchViewController: UIViewController {
         
         let casts = self.findCastsByName(name: keyword)
         print("searched casts: \(casts.count)")
-//        for cast in casts {
-//            guard let c = cast.credits else { continue }
-//            let credits = c.allObjects
-//            print("there are \(credits.count) credits")
             
         let castReq: NSFetchRequest<MovieMetadata> = MovieMetadata.fetchRequest()
         pred = NSPredicate(format: "credit.casts == %@", casts)
@@ -43,16 +39,6 @@ class SearchViewController: UIViewController {
         let moviesByCast = try! context.fetch(castReq)
         moviesByCast.forEach { res.insert($0) }
             
-//            for credit in credits {
-//                let newReq: NSFetchRequest<MovieMetadata> = MovieMetadata.fetchRequest()
-//                pred = NSPredicate(format: "credit == %@", credit as! Credit)
-//                let ord = NSSortDescriptor(key: "vote_average", ascending: false)
-//                req.predicate = pred
-//                req.sortDescriptors = [ord]
-//                let moviesByCredit = try! context.fetch(newReq)
-//                moviesByCredit.forEach { res.append($0) }
-//            }
-//        }
         print("total \(res.count) movies searched")
         
         self.searchedResults = Array(res)
@@ -140,33 +126,6 @@ extension SearchViewController {
         guard let keyword = self.searchTextField?.text else {
             return
         }
-        
-//        print("search keyword: \(keyword)")
-//
-////        search movie itself first.
-//        self.searchedResults = self.moviesMetadata
-//            .filter { self.containsCaseInsensitive($1.title, keyword) }
-//
-//
-//        print("searched results: \(self.searchedResults.count)")
-//
-////        search name second.
-//        let searchedCredit = self.credits
-//            .filter { $0.cast.filter { self.containsCaseInsensitive($0.name, keyword) }.count > 0 }
-//        print("searched credit: \(searchedCredit)")
-//        for credit in searchedCredit {
-//            if !self.searchedResults.contains(where: { dictId, _ in return dictId == credit.id }) {
-//                // if there is no any id in `self.searchedResults`.
-//                self.searchedResults[Int(credit.id)] = self.moviesMetadata[Int(credit.id)]
-//            }
-//        }
-//
-//        print("search final: \(self.searchedResults)")
-//
-//        self.movies = Array(self.searchedResults.values)
-//        self.movies.sort { $0.vote_average > $1.vote_average }
-//
-//        self.searchResultsTableView?.reloadData()
         
         self.findMoviesByKeywordOrName(keyword: keyword)
     }

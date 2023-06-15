@@ -29,10 +29,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             CSVHelper.initializeCredits()
         }
         
-//        let ratings = try! self.persistentContainer.viewContext.fetch(Rating.fetchRequest())
-//        if ratings.isEmpty {
         CSVHelper.initializeRatings() // load `ratings.csv` file to memory.
-//        }
         
         
         
